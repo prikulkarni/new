@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div>
+  <h3> Samples</h3>
+  <ul class = "list-group">
+    {% for sample in samples %}
+      <li class = "list-group-item">{{sample.samplename}}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
