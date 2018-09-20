@@ -21,7 +21,6 @@ Base = declarative_base()
 
 
 
-
 class DBinfo:
     user        = 'postgres'
     password    = 'linux123'
@@ -255,7 +254,7 @@ class Sample(Base):
             #creation_event_type = db_tools.get_sample_event_type(session, 'creation')
             user                = db_tools.get_user(session, user)
             creation_event_type = db_tools.get_sample_event_type(session, 'creation')
-        samplename          = samplename.upper()
+        #samplename          = samplename.upper()
         self.samplename     = samplename
         self.comment        = comment
 

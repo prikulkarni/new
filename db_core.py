@@ -245,7 +245,8 @@ class Sample(Base):
                  samplename,
                  comment,
                  sample_types,
-                 sample_states = 'default',
+                 #sample_states = 'default',
+                 sample_states,
                  parents = None,
                  session = None):
 
@@ -255,34 +256,34 @@ class Sample(Base):
             #creation_event_type = db_tools.get_sample_event_type(session, 'creation')
             user                = db_tools.get_user(session, user)
             creation_event_type = db_tools.get_sample_event_type(session, 'creation')
-        samplename          = samplename.upper()
+        #samplename          = samplename.upper()
         self.samplename     = samplename
         self.comment        = comment
 
         # associate sample with sample states
-        if sample_states:
-            if type(sample_states) is not list: sample_states = [sample_states]
-
-            for sample_state in sample_states:
-                #if session is not None: sample_state = db_tools.get_sample_state(session, sample_state)
-                if session is not None: sample_state = db_tools.get_sample_state(session, sample_state)
-                self.sample_states.append(sample_state)
+        # if sample_states:
+        #     if type(sample_states) is not list: sample_states = [sample_states]
+        #
+        #     for sample_state in sample_states:
+        #         #if session is not None: sample_state = db_tools.get_sample_state(session, sample_state)
+        #         if session is not None: sample_state = db_tools.get_sample_state(session, sample_state)
+        #         self.sample_states.append(sample_state)
 
 
         # associate sample with sample types
-        if sample_types:
-            if type(sample_types) is not list: sample_types = [sample_types]
-
-            for sample_type in sample_types:
-                if session is not None: sample_type = db_tools.get_sample_type(session, sample_type)
-                if not re.match(sample_type.regular_expression, samplename):
-                    session.rollback()
-                    raise ValueError('Sample name does not match sample type\'s regular expression (' + sample_type.regular_expression + ')')
-
-                self.sample_types.append(sample_type)
-
-        else:
-            raise ValueError('No sample type has been specified!')
+        # if sample_types:
+        #     if type(sample_types) is not list: sample_types = [sample_types]
+        #
+        #     for sample_type in sample_types:
+        #         if session is not None: sample_type = db_tools.get_sample_type(session, sample_type)
+        #         if not re.match(sample_type.regular_expression, samplename):
+        #             session.rollback()
+        #             raise ValueError('Sample name does not match sample type\'s regular expression (' + sample_type.regular_expression + ')')
+        #
+        #         self.sample_types.append(sample_type)
+        #
+        # else:
+        #     raise ValueError('No sample type has been specified!')
 
         # maybe the sample has some parents, associate them here
         if parents is not None:
@@ -297,14 +298,14 @@ class Sample(Base):
                     self.parents.append(ancestor)
 
         # Add an event to record sample creation
-        creation_event      = Sample_Event(
-                user                = user,
-                sample              = self,
-                sample_event_type   = creation_event_type,
-                comment             = 'Creation of the sample'
-                )
-
-        self.sample_events.append(creation_event)
+        # creation_event      = Sample_Event(
+        #         user                = user,
+        #         sample              = self,
+        #         sample_event_type   = creation_event_type,
+        #         comment             = 'Creation of the sample'
+        #         )
+        #
+        # self.sample_events.append(creation_event)
 
 
 
