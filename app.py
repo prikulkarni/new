@@ -2,16 +2,16 @@ from flask import Flask, render_template, flash, redirect, url_for, request, ses
 #from data import Articles
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
-from wtforms import Form, StringField, TextField, TextAreaField, PasswordField, validators
+from wtforms import Form, SubmitField, StringField, TextField, TextAreaField, PasswordField, validators
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from passlib.hash import sha256_crypt
 from functools import wraps
-from db_core import DB_COM, Base, Sample, Sample_Type, Sample_State
+import vibrobase as vb
+from vibrobase import db_core
+from vibrobase.db_core import DB_COM, Base, Sample, Sample_Type, Sample_State
 
 import json
 import plotly
-import db_core as db_core
-
 import pandas as pd
 import numpy as np
 
@@ -74,8 +74,10 @@ class AddSampleForm(Form):
     typename = QuerySelectField ('Sample Type', [validators.Required()], query_factory = get_sample_types, get_label = 'typename' )
     statename = QuerySelectField ('Sample State', [validators.Required()], query_factory = get_sample_states, get_label = 'statename' )
     select_parents = QuerySelectField ('Select Parents', allow_blank = True, query_factory = get_parents, get_label = 'samplename' )
+    add_parent = SubmitField ('Add Parent')
     parents = ReadOnlyTextField ('Selected Parents')
-    comment = TextAreaField('Comment', [validators.Length(min=1)])
+    comment = TextAreaField('Comment')
+    add_sample = SubmitField ('Add Sample')
 
 @app.route('/add_sample', methods=['GET', 'POST'])
 def add_sample():
@@ -84,17 +86,25 @@ def add_sample():
     #Populate selected parents
     #form.parents.data = form.select_parents.data
     if request.method == 'POST' and form.validate():
-        samplename      = request.form['samplename'],
-        sample_types    = request.form['typename'],
-        sample_states   = request.form['statename'],
-        parents         = request.form['parents'],
-        comment         = request.form['comment'],
-        user            = 'Default'
-        samp = Sample (user, samplename, comment, sample_types, sample_states)
-        session.add(samp)
-        session.commit()
+        if form.add_sample.data:
+            samplename      = request.form['samplename'],
+            sample_types    = request.form['typename'],
+            sample_states   = request.form['statename'],
+            parents         = request.form['parents'],
+            comment         = request.form['comment'],
+            user            = 'Default'
+            samp = Sample (user, samplename, comment, sample_types, sample_states)
+            session.add(samp)
+            session.commit()
 
-        flash('Sample Added','success')
+            flash('Sample Added','success')
+        elif form.add_parent.data:
+            selected_parent = form.select_parents.raw_data
+            if form.parents.data:
+                previous_parents = form.parents.raw_data
+                appended_data = previous_parents.append(selected_parent)
+            else:
+                form.parents.data = selected_parent
 
     return render_template('add_sample.html', form=form)
 

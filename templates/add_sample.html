@@ -16,6 +16,7 @@
   <div class = "form-group">
     {{render_field(form.select_parents, class_="form-control")}}
     <!-- <p><input type="submit" class="btn btn-primary" value="Add Parent"> </p> -->
+    {{render_field(form.add_parent, class_="form-control")}}
   </div>
   <div class = "form-group">
     {{render_field(form.parents, class_="form-control")}}
@@ -23,6 +24,9 @@
   <div class = "form-group">
     {{render_field(form.comment, class_="form-control", id="editor")}}
   </div>
-  <p><input type="submit" class="btn btn-primary" value="Add Sample"> </p>
+  <div class = "form-group">
+    {{render_field(form.add_sample, class_="form-control")}}
+  </div>
+  <!-- <p><input type="submit" class="btn btn-primary" value="Add Sample"> </p> -->
 </form>
 {% endblock %}
