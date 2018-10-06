@@ -15,7 +15,6 @@ import enum
 import vibrobase as vb
 import datetime
 import re
-import db_tools as db_tools
 
 Base = declarative_base()
 
@@ -23,10 +22,10 @@ Base = declarative_base()
 
 
 class DBinfo:
-    user        = 'postgres'
-    password    = 'linux123'
+    user        = 'pgadmin'
+    password    = 'pgadmin'
     database    = 'vibrobase'
-    host        = 'localhost'
+    host        = '192.168.42.204'
     port        =  5432
     encoding    = 'utf8'
 
@@ -245,52 +244,51 @@ class Sample(Base):
                  samplename,
                  comment,
                  sample_types,
-                 #sample_states = 'default',
-                 sample_states,
+                 sample_states = 'default',
                  parents = None,
                  session = None):
 
 
         if session is not None:
-            #user                = db_tools.get_user(session, user)
-            #creation_event_type = db_tools.get_sample_event_type(session, 'creation')
-            user                = db_tools.get_user(session, user)
-            creation_event_type = db_tools.get_sample_event_type(session, 'creation')
-        #samplename          = samplename.upper()
+            user                = vb.db_tools.get_user(session, user)
+            creation_event_type = vb.db_tools.get_sample_event_type(session, 'creation')
+
+        str = ''
+        samplename = str.join(samplename)
+        samplename          = samplename.upper()
         self.samplename     = samplename
         self.comment        = comment
 
         # associate sample with sample states
-        # if sample_states:
-        #     if type(sample_states) is not list: sample_states = [sample_states]
-        #
-        #     for sample_state in sample_states:
-        #         #if session is not None: sample_state = db_tools.get_sample_state(session, sample_state)
-        #         if session is not None: sample_state = db_tools.get_sample_state(session, sample_state)
-        #         self.sample_states.append(sample_state)
+        if sample_states:
+            if type(sample_states) is not list: sample_states = [sample_states]
+
+            for sample_state in sample_states:
+                if session is not None: sample_state = sample_state(name=vb.db_tools.get_sample_state(session, sample_state).first())
+                self.sample_states.append(sample_state)
 
 
         # associate sample with sample types
-        # if sample_types:
-        #     if type(sample_types) is not list: sample_types = [sample_types]
-        #
-        #     for sample_type in sample_types:
-        #         if session is not None: sample_type = db_tools.get_sample_type(session, sample_type)
-        #         if not re.match(sample_type.regular_expression, samplename):
-        #             session.rollback()
-        #             raise ValueError('Sample name does not match sample type\'s regular expression (' + sample_type.regular_expression + ')')
-        #
-        #         self.sample_types.append(sample_type)
-        #
-        # else:
-        #     raise ValueError('No sample type has been specified!')
+        if sample_types:
+            if type(sample_types) is not list: sample_types = [sample_types]
+
+            for sample_type in sample_types:
+                if session is not None: sample_type = vb.db_tools.get_sample_type(session, sample_type)
+                if not re.match(sample_type.regular_expression, samplename):
+                    session.rollback()
+                    raise ValueError('Sample name does not match sample type\'s regular expression (' + sample_type.regular_expression + ')')
+
+                self.sample_types.append(sample_type)
+
+        else:
+            raise ValueError('No sample type has been specified!')
 
         # maybe the sample has some parents, associate them here
         if parents is not None:
             if type(parents) is not list: parents = [parents]
 
             for parent in parents:
-                if session is not None: parent = db_tools.get_sample(session, parent)
+                if session is not None: parent = vb.db_tools.get_sample(session, parent)
 
                 self.parents.append(parent)
 
@@ -298,14 +296,14 @@ class Sample(Base):
                     self.parents.append(ancestor)
 
         # Add an event to record sample creation
-        # creation_event      = Sample_Event(
-        #         user                = user,
-        #         sample              = self,
-        #         sample_event_type   = creation_event_type,
-        #         comment             = 'Creation of the sample'
-        #         )
-        #
-        # self.sample_events.append(creation_event)
+        creation_event      = Sample_Event(
+                user                = user,
+                sample              = self,
+                sample_event_type   = creation_event_type,
+                comment             = 'Creation of the sample'
+                )
+
+        self.sample_events.append(creation_event)
 
 
 
@@ -385,9 +383,9 @@ class Sample_Event(Base):
                  session        = None):
 
         if session is not None:
-            user                = db_tools.get_user(session, user)
-            sample              = db_tools.get_sample(session, sample)
-            sample_event_type   = db_tools.get_sample_event_type(session, sample_event_type)
+            user                = vb.db_tools.get_user(session, user)
+            sample              = vb.db_tools.get_sample(session, sample)
+            sample_event_type   = vb.db_tools.get_sample_event_type(session, sample_event_type)
 
 
         self.user               = user
@@ -497,10 +495,10 @@ class Measurement_Series(Base):
 
 
         if session is not None:
-            user                = db_tools.get_user(session, user)
-            sample              = db_tools.get_sample(session, sample)
-            measurement_type    = db_tools.get_measurement_type(session, measurement_type)
-            series_event_type   = db_tools.get_sample_event_type(session, 'measurement_series')
+            user                = vb.db_tools.get_user(session, user)
+            sample              = vb.db_tools.get_sample(session, sample)
+            measurement_type    = vb.db_tools.get_measurement_type(session, measurement_type)
+            series_event_type   = vb.db_tools.get_sample_event_type(session, 'measurement_series')
 
         self.comment            = comment
         self.measurement_type   = measurement_type
@@ -545,10 +543,10 @@ class Measurement(Base):
 
         if session is not None:
             with session.no_autoflush:
-                user                = db_tools.get_user(session, user)
-                sample              = db_tools.get_sample(session, sample)
-                measurement_series  = db_tools.get_measurement_series(session, measurement_series)
-                sample_event_type   = db_tools.get_sample_event_type(session, sample_event_type)
+                user                = vb.db_tools.get_user(session, user)
+                sample              = vb.db_tools.get_sample(session, sample)
+                measurement_series  = vb.db_tools.get_measurement_series(session, measurement_series)
+                sample_event_type   = vb.db_tools.get_sample_event_type(session, sample_event_type)
 
         self.measurement_series = measurement_series
         self.variation_parameter= variation_parameter
@@ -608,8 +606,8 @@ class LCR_Measurement(Base):
 
 
         if session is not None:
-            lcr_config          = db_tools.get_lcr_config(session, lcr_config)
-            sample_event_type   = db_tools.get_sample_event_type(session, sample_event_type)
+            lcr_config          = vb.db_tools.get_lcr_config(session, lcr_config)
+            sample_event_type   = vb.db_tools.get_sample_event_type(session, sample_event_type)
 
         self.measurement        = measurement
         self.lcr_config         = lcr_config
@@ -660,8 +658,8 @@ class SMU_Measurement(Base):
 
 
         if session is not None:
-            smu_config          = db_tools.get_smu_config(session, smu_config)
-            sample_event_type   = db_tools.get_sample_event_type(session, sample_event_type)
+            smu_config          = vb.db_tools.get_smu_config(session, smu_config)
+            sample_event_type   = vb.db_tools.get_sample_event_type(session, sample_event_type)
 
         self.measurement        = measurement
         self.smu_config         = smu_config
@@ -743,7 +741,7 @@ class LCR_Configuration(Base):
                  session = None):
 
         if session is not None:
-            user = db_tools.get_user(session, user)
+            user = vb.db_tools.get_user(session, user)
 
         self.lcrconfigname      = lcrconfigname
         self.user             	= user
@@ -796,7 +794,7 @@ class SMU_Configuration(Base):
                  session = None):
 
         if session is not None:
-            user = db_tools.get_user(session, user)
+            user = vb.db_tools.get_user(session, user)
 
         self.smuconfigname   =   smuconfigname
         self.user            =   user
@@ -850,7 +848,7 @@ class LDV_Configuration(Base):
                  session = None):
 
         if session is not None:
-            user = db_tools.get_user(session, user)
+            user = vb.db_tools.get_user(session, user)
 
         self.ldvconfigname      =   ldvconfigname
         self.user               =   user
