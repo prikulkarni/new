@@ -102,26 +102,24 @@ def add_sample():
 
             flash('Sample Added','success')
         elif form.add_parent.data:
-            selected_parent = form.select_parents.data
-            parents = [form.parents.raw_data]
-            appended_parents = [parents + selected_parent]
-            form.parents.raw_data = appended_parents
-            # if parents != []:
-            #     previous_parents = parents
-            #     appended_parents = previous_parents.append(selected_parent)
-            #     form.parents.data = appended_parents
-            # else:
-            #     form.parents.data = selected_parent
+            selected_parent = form.select_parents.raw_data
+            parents = form.parents.raw_data
+            # parents.extend(selected_parent)
+            # form.parents.data = parents
+            if parents == ['']:
+                form.parents.data = selected_parent[0]
+            else:
+                parents.extend(selected_parent[0])
+                form.parents.data = parents
 
         elif form.add_sample_type.data:
-            selected_type = form.typename.data
+            selected_type = form.typename.raw_data
             sample_types = form.sample_types.raw_data
             if sample_types == ['']:
-                form.sample_types.data = selected_type
+                form.sample_types.data = selected_type[0]
             else:
-                previous_types = sample_types
-                appended_types = previous_types.append(selected_type)
-                form.sample_types.data = appended_types
+                sample_types.append(selected_type[0])
+                form.sample_types.data = sample_types
 
     return render_template('add_sample.html', form=form)
 
