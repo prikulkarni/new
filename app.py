@@ -9,7 +9,7 @@ from functools import wraps
 import vibrobase as vb
 from vibrobase import db_core
 from vibrobase.db_core import DB_COM, Base, Sample, Sample_Type, Sample_State
-
+from markupsafe import Markup
 import json
 import plotly
 import pandas as pd
@@ -71,13 +71,16 @@ def get_parents():
 #Add Sample Form Class
 class AddSampleForm(Form):
     samplename = StringField('Name', [validators.Length(min=1, max=20)])
-    typename = QuerySelectField ('Sample Type', [validators.Required()], query_factory = get_sample_types, get_label = 'typename' )
+    typename = QuerySelectField ('Sample Type', query_factory = get_sample_types, get_label = 'typename' )
+    add_sample_type = SubmitField ('Add Sample Type')
+    sample_types = ReadOnlyTextField ('Selected Sample Types')
     statename = QuerySelectField ('Sample State', [validators.Required()], query_factory = get_sample_states, get_label = 'statename' )
     select_parents = QuerySelectField ('Select Parents', allow_blank = True, query_factory = get_parents, get_label = 'samplename' )
     add_parent = SubmitField ('Add Parent')
     parents = ReadOnlyTextField ('Selected Parents')
     comment = TextAreaField('Comment')
-    add_sample = SubmitField ('Add Sample')
+    add_sample_value = Markup('Add Sample')
+    add_sample = SubmitField (add_sample_value)
 
 @app.route('/add_sample', methods=['GET', 'POST'])
 def add_sample():
@@ -88,23 +91,37 @@ def add_sample():
     if request.method == 'POST' and form.validate():
         if form.add_sample.data:
             samplename      = request.form['samplename'],
-            sample_types    = request.form['typename'],
-            sample_states   = request.form['statename'],
+            sample_types    = request.form['sample_types'],
+            sample_state   = request.form['statename'],
             parents         = request.form['parents'],
             comment         = request.form['comment'],
             user            = 'Default'
-            samp = Sample (user, samplename, comment, sample_types, sample_states)
+            samp = Sample (user, samplename, comment, sample_types, sample_state)
             session.add(samp)
             session.commit()
 
             flash('Sample Added','success')
         elif form.add_parent.data:
-            selected_parent = form.select_parents.raw_data
-            if form.parents.data:
-                previous_parents = form.parents.raw_data
-                appended_data = previous_parents.append(selected_parent)
+            selected_parent = form.select_parents.data
+            parents = [form.parents.raw_data]
+            appended_parents = [parents + selected_parent]
+            form.parents.raw_data = appended_parents
+            # if parents != []:
+            #     previous_parents = parents
+            #     appended_parents = previous_parents.append(selected_parent)
+            #     form.parents.data = appended_parents
+            # else:
+            #     form.parents.data = selected_parent
+
+        elif form.add_sample_type.data:
+            selected_type = form.typename.data
+            sample_types = form.sample_types.raw_data
+            if sample_types == ['']:
+                form.sample_types.data = selected_type
             else:
-                form.parents.data = selected_parent
+                previous_types = sample_types
+                appended_types = previous_types.append(selected_type)
+                form.sample_types.data = appended_types
 
     return render_template('add_sample.html', form=form)
 
