@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div>
+    <h3> Sample Events</h3>
+    <!-- <ul class = "list-group">
+      {% for sample_event in sample_events %}
+        <li class = "list-group-item">{{sample_event.id}}</a></li>
+      {% endfor %}
+    </ul> -->
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Time</th>
+          <th>User</th>
+          <th>Event Type</th>
+          <th>Measurement Type</th>
+          <th>Comment</th>
+          <th>Attachment</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sample_event in sample_events %}
+
+          <tr>
+            <th>{{ sample_event.id }}</th>
+            <th>{{ sample_event.timestamp }}</th>
+            <th>{{ sample_event.user_id }}</th>
+            <th>{{ get_sample_event_type(session, sample_event.sample_event_type_id) }}</th>
+            <th>{{ sample_event.id }}</th>
+            <th>{{ sample_event.id }}</th>
+            <th>{{ sample_event.id }}</th>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+{% endblock %}

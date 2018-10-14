@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+{% from "includes/_formhelpers.html" import render_field %}
+<div>
+  <div class = "form-group">
+    {{render_field(form.select_sample, class_="form-control")}}
+  </div>
+  <p><input type="submit" class="btn btn-primary" value="Show Events"> </p>
+  <!-- <div class = "form-group">
+    {{render_field(form.show_events, class_="form-control")}}
+  </div> -->
+  <!-- <a href="/browse_sample_events/{{sample}}" class="btn btn-primary">Show Events</a> -->
+
+
+  <!-- <div>
+    <h3> Sample Events</h3>
+    <ul class = "list-group">
+      {% for sample_event in sample_events %}
+        <li class = "list-group-item">{{sample_event.id}}</a></li>
+      {% endfor %}
+    </ul>
+  </div> -->
+</div>
+{% endblock %}
